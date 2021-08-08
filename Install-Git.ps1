@@ -13,12 +13,11 @@ function Install-Git {
         [string]
         $Repo
     )
-    begin {
+    try {
         $ErrorActionPreference = 'Stop'
         $TempDir = New-Item -Type Directory -Name $([System.Guid]::NewGuid().ToString()) -Path $([IO.Path]::GetTempPath().ToString()) -Force
         $TempDir = $TempDir | Select-Object -ExpandProperty FullName
-    }
-    process {
+
         try {
             git
         }
@@ -40,9 +39,9 @@ function Install-Git {
                 Invoke-RestMethod -Method Get -Uri $DownloadUrl.browser_download_url -OutFile $OutputPath
             }
             catch {
-                Write-Verbose -Message $_.Exception.Message
                 Write-Verbose -Message "Failed to download git on your laptop, download and install git manually."
                 Write-Verbose -Message "Download location: https://gitforwindows.org/"
+                Write-Verbose -Message $_.Exception.Message
             }
 
             Write-Verbose -Message "Trying to install git."
@@ -52,9 +51,9 @@ function Install-Git {
                 Start-Process $OutputPath $arguments -Wait
             }
             catch {
-                Write-Verbose -Message $_.Exception.Message
                 Write-Verbose -Message "Failed to install Git on your laptop, download and install GIT Manually."
                 Write-Verbose -Message "Download Location: https://gitforwindows.org/"
+                Write-Verbose -Message $_.Exception.Message
             }
 
         }
@@ -62,7 +61,10 @@ function Install-Git {
             Write-Verbose -Message "Git is already installed, no action needed."
         }
     }
-    end {
+    catch {
+        Write-Verbose -Message $_.Exception.Message
+    }
+    finally {
         Remove-Item -Path $TempDir -Recurse -Force
     }
 }

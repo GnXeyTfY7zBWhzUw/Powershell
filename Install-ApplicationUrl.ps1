@@ -66,7 +66,7 @@ function Install-ApplicationUrl {
                 } else {
                     Write-Verbose -Message "Trying to download $Url"
                     if (!($Filename)) {
-                        $Filename = ($Url | Select-String -Pattern "[^/\\&\?]+\.\w{3,4}(?=([\?&].*$|$))").Matches.Value #| Select-Object -ExpandProperty Matches | Select-Object -ExpandProperty Value
+                        $Filename = $($Url | Select-String -Pattern "[^/\\&\?]+\.\w{3,4}(?=([\?&].*$|$))").Matches.Value #| Select-Object -ExpandProperty Matches | Select-Object -ExpandProperty Value
                     }
                     $OutputPath = Join-Path -Path $TempDir -ChildPath $Filename
                     Invoke-RestMethod -Method Get -Uri $Url -OutFile $OutputPath

@@ -19,7 +19,7 @@ function Install-ApplicationUrl {
         $FileName,
 
         [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
-        [string]
+        [array]
         $ArgumentList,
 
         [Parameter(Mandatory = $false)]
@@ -27,6 +27,7 @@ function Install-ApplicationUrl {
         $MeasureTime
     )
     begin {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         #$ErrorActionPreference = 'Stop'
         if ($MeasureTime) {
             $FuncStartTime = Get-Date
@@ -54,16 +55,21 @@ function Install-ApplicationUrl {
             }
             catch {
                 Write-Warning -Message "Failed to download application, download and install application manually."
-                Write-Error -Message $_.Exception.Message.ToString()
+                Write-Error -Message $_.Exception.Message
                 return
             }
 
             try {
-                Start-Process -FilePath $OutputPath -ArgumentList $ArgumentList -Wait
+                if ($ArgumentList) {
+                    Start-Process -FilePath $OutputPath -ArgumentList $ArgumentList -Wait
+                }
+                else {
+                    Start-Process -FilePath $OutputPath -Wait
+                }
             }
             catch {
                 Write-Warning -Message "Failed to install application, download and install application manually."
-                Write-Error -Message $_.Exception.Message.ToString()
+                Write-Error -Message $_.Exception.Message
                 return
             }
         }
@@ -94,14 +100,14 @@ $InstallList = New-Object -TypeName System.Collections.Generic.List[pscustomobje
 
 $VSCode = [PSCustomObject]@{
     Url          = "https://code.visualstudio.com/sha/download?build=stable&os=win32-x64"
-    ArgumentList = [string]"/VERYSILENT", "/NORESTART", "/MERGETASKS=!runcode"
+    ArgumentList = "/VERYSILENT", "/NORESTART", "/MERGETASKS=!runcode"
     Filename     = "VSCode.exe"
 }
 $InstallList.Add($VSCode)
 
 $Steam = [PSCustomObject]@{
     Url          = "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe"
-    ArgumentList = [string]"/S"
+    ArgumentList = "/S"
 }
 $InstallList.Add($Steam)
 

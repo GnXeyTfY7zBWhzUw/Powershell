@@ -74,3 +74,5 @@ function Install-Steam {
         }
     }
 }
+
+Install-Steam -Verbose

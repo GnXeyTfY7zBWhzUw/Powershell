@@ -10,19 +10,26 @@ function Install-ApplicationUrl {
     #Requires -RunAsAdministrator
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = "Url")]
         [string]
         $Url,
 
-        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = "Github")]
+        [string]
+        $Github,
+
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true, ParameterSetName = "Github")]
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true, ParameterSetName = "Url")]
         [string]
         $FileName,
 
-        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true, ParameterSetName = "Github")]
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true, ParameterSetName = "Url")]
         [array]
         $ArgumentList,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true, ParameterSetName = "Github")]
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true, ParameterSetName = "Url")]
         [switch]
         $MeasureTime
     )
@@ -46,12 +53,21 @@ function Install-ApplicationUrl {
 
             # Download file to temporary folder
             try {
-                Write-Verbose -Message "Trying to download $Url"
-                if (!($Filename)) {
-                    $Filename = ($Url | Select-String -Pattern "[^/\\&\?]+\.\w{3,4}(?=([\?&].*$|$))").Matches.Value #| Select-Object -ExpandProperty Matches | Select-Object -ExpandProperty Value
+                if ($Github) {
+                    $Releases = "https://api.github.com/repos/$Github/releases"
+                    Write-Verbose -Message "Trying to download from $Releases"
+                    $Response = Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json
+                    $DownloadUrl = $Response.assets | Where-Object { ($_.Name -like "*64*.exe" -or $_.Name -like "*64*.msi") -and (-not($_.Name -like "*rc*" -or $_.Name -like "*zip*" -or $_.Name -like "*7z*")) } | Sort-Object -Property created_at -Descending | Select-Object -First 1
+                    $OutputPath = Join-Path -Path $TempDir -ChildPath $($DownloadUrl.Name)
+                    Invoke-RestMethod -Method Get -Uri $DownloadUrl.browser_download_url -OutFile $OutputPath
+                } else {
+                    Write-Verbose -Message "Trying to download $Url"
+                    if (!($Filename)) {
+                        $Filename = ($Url | Select-String -Pattern "[^/\\&\?]+\.\w{3,4}(?=([\?&].*$|$))").Matches.Value #| Select-Object -ExpandProperty Matches | Select-Object -ExpandProperty Value
+                    }
+                    $OutputPath = Join-Path -Path $TempDir -ChildPath $Filename
+                    Invoke-RestMethod -Method Get -Uri $Url -OutFile $OutputPath
                 }
-                $OutputPath = Join-Path -Path $TempDir -ChildPath $Filename
-                Invoke-RestMethod -Method Get -Uri $Url -OutFile $OutputPath
             }
             catch {
                 Write-Warning -Message "Failed to download application, download and install application manually."
@@ -110,5 +126,17 @@ $Steam = [PSCustomObject]@{
     ArgumentList = "/S"
 }
 $InstallList.Add($Steam)
+
+$KeePassXC = [PSCustomObject]@{
+    Github       = "keepassxreboot/keepassxc"
+    ArgumentList = "/S"
+}
+$InstallList.Add($KeePassXC)
+
+$Git = [PSCustomObject]@{
+    Github       = "git-for-windows/git"
+    ArgumentList = "/VERYSILENT", "/NORESTART", "/NOCANCEL", "/SP-", "/CLOSEAPPLICATIONS", "/RESTARTAPPLICATIONS"
+}
+$InstallList.Add($Git)
 
 $InstallList | Install-ApplicationUrl -MeasureTime -Verbose

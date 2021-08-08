@@ -58,7 +58,10 @@ function Install-ApplicationUrl {
                     Write-Verbose -Message "Trying to download from $Releases"
                     $Response = Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json
                     $DownloadUrl = $Response.assets | Where-Object { ($_.Name -like "*64*.exe" -or $_.Name -like "*64*.msi") -and (-not($_.Name -like "*rc*" -or $_.Name -like "*zip*" -or $_.Name -like "*7z*")) } | Sort-Object -Property created_at -Descending | Select-Object -First 1
-                    $OutputPath = Join-Path -Path $TempDir -ChildPath $($DownloadUrl.Name)
+                    if (!($FileName)) {
+                        $Filename = $DownloadUrl.Name
+                    }
+                    $OutputPath = Join-Path -Path $TempDir -ChildPath $Filename
                     Invoke-RestMethod -Method Get -Uri $DownloadUrl.browser_download_url -OutFile $OutputPath
                 } else {
                     Write-Verbose -Message "Trying to download $Url"
@@ -129,7 +132,7 @@ $InstallList.Add($Steam)
 
 $KeePassXC = [PSCustomObject]@{
     Github       = "keepassxreboot/keepassxc"
-    ArgumentList = "/S"
+    ArgumentList = "/QN"
 }
 $InstallList.Add($KeePassXC)
 

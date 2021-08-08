@@ -94,14 +94,14 @@ $InstallList = New-Object -TypeName System.Collections.Generic.List[pscustomobje
 
 $VSCode = [PSCustomObject]@{
     Url          = "https://code.visualstudio.com/sha/download?build=stable&os=win32-x64"
-    ArgumentList = "/VERYSILENT", "/NORESTART", "/MERGETASKS=!runcode"
+    ArgumentList = [string]"/VERYSILENT", "/NORESTART", "/MERGETASKS=!runcode"
     Filename     = "VSCode.exe"
 }
 $InstallList.Add($VSCode)
 
 $Steam = [PSCustomObject]@{
     Url          = "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe"
-    ArgumentList = "/S"
+    ArgumentList = [string]"/S"
 }
 $InstallList.Add($Steam)
 

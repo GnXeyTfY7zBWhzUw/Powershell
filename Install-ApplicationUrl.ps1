@@ -93,14 +93,14 @@ function Install-ApplicationUrl {
 $InstallList = New-Object -TypeName System.Collections.Generic.List[pscustomobject] # [pscustomobject] [string]
 
 $VSCode = [PSCustomObject]@{
-    Url = "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe"
+    Url          = "https://code.visualstudio.com/sha/download?build=stable&os=win32-x64"
     ArgumentList = "/S"
-    Filename = "VSCode.exe"
+    Filename     = "VSCode.exe"
 }
 $InstallList.Add($VSCode)
 
 $Steam = [PSCustomObject]@{
-    Url = "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe"
+    Url          = "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe"
     ArgumentList = "/S"
 }
 $InstallList.Add($Steam)

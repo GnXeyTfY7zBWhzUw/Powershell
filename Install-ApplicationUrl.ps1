@@ -53,8 +53,8 @@ function Install-ApplicationUrl {
                 Invoke-RestMethod -Method Get -Uri $Url -OutFile $OutputPath
             }
             catch {
-                Write-Warning -Message "Ran into an error: $_"
-                Write-Error -Message "Failed to download application, download and install application manually."
+                Write-Warning -Message "Failed to download application, download and install application manually."
+                Write-Error -Message $_.Exception.Message.ToString()
                 return
             }
 
@@ -62,14 +62,13 @@ function Install-ApplicationUrl {
                 Start-Process -FilePath $OutputPath -ArgumentList $ArgumentList -Wait
             }
             catch {
-                Write-Error -Message "$($_.Exception.Message)"
-                # Write-Warning -Message "Failed to install application, download and install application manually."
-                # Write-Error -Message $_
-                #Write-Error -Message "Failed to install application, download and install application manually."
+                Write-Warning -Message "Failed to install application, download and install application manually."
+                Write-Error -Message $_.Exception.Message.ToString()
                 return
             }
         }
         catch {
+            Write-Warning -Message "Something went wrong."
             Write-Error -Message $_.Exception.Message
             return
         }

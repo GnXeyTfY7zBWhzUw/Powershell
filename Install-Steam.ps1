@@ -16,6 +16,7 @@ function Install-Steam {
     )
     begin {
         $ErrorActionPreference = 'Stop'
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         if ($MeasureTime) {
             $FuncStartTime = Get-Date
             Write-Verbose -Message "Function start time: $(Get-Date -Date $FuncStartTime -Format FileDateTimeUniversal)"
@@ -47,7 +48,7 @@ function Install-Steam {
 
             try {
                 $Arguments = "/S"
-                Start-Process $OutputPath $Arguments -Wait
+                Start-Process -FilePath $OutputPath -ArgumentList $Arguments -Wait
             }
             catch {
                 Write-Verbose -Message "Failed to install Steam on your laptop, download and install Steam manually."

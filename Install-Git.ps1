@@ -43,7 +43,7 @@ function Install-Git {
                 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
                 $Releases = "https://api.github.com/repos/git-for-windows/git/releases"
                 $Response = Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json
-                $DownloadUrl = $Response.assets | Where-Object { $_.Name -match "-64-bit.exe" -and $_.Name -notmatch "rc" } | Sort-Object -Property created_at -Descending | Select-Object -First 1
+                $DownloadUrl = $Response.assets | Where-Object { ($_.Name -like "*64*.exe" -or $_.Name -like "*64*.msi") -and (-not($_.Name -like "*rc*" -or $_.Name -like "*zip*" -or $_.Name -like "*7z*")) } | Sort-Object -Property created_at -Descending | Select-Object -First 1
 
                 # Download file to temporary folder
                 Write-Verbose -Message "Trying to download $($DownloadUrl.browser_download_url)."
@@ -61,7 +61,7 @@ function Install-Git {
 
                 try {
                     $Arguments = "/VERYSILENT", "/NORESTART", "/NOCANCEL", "/SP-", "/CLOSEAPPLICATIONS", "/RESTARTAPPLICATIONS"
-                    Start-Process $OutputPath $Arguments -Wait
+                    Start-Process -FilePath $OutputPath -ArgumentList -Wait
                 }
                 catch {
                     Write-Verbose -Message "Failed to install Git on your laptop, download and install GIT Manually."

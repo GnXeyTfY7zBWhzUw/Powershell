@@ -6,6 +6,8 @@ function Install-ApplicationUrl {
         Lorem ipsum
     .EXAMPLE
         Lorem ipsum
+    .LINK
+        Adapted from https://www.robvit.com/automation/install-git-with-powershell-on-windows/
     #>
     #Requires -RunAsAdministrator
     [CmdletBinding()]
@@ -28,8 +30,8 @@ function Install-ApplicationUrl {
         [array]
         $ArgumentList,
 
-        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true, ParameterSetName = "Github")]
-        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true, ParameterSetName = "Url")]
+        [Parameter(Mandatory = $false, ParameterSetName = "Github")]
+        [Parameter(Mandatory = $false, ParameterSetName = "Url")]
         [switch]
         $MeasureTime
     )
@@ -66,7 +68,7 @@ function Install-ApplicationUrl {
                 } else {
                     Write-Verbose -Message "Trying to download $Url"
                     if (!($Filename)) {
-                        $Filename = $($Url | Select-String -Pattern "[^/\\&\?]+\.\w{3,4}(?=([\?&].*$|$))").Matches.Value #| Select-Object -ExpandProperty Matches | Select-Object -ExpandProperty Value
+                        $Filename = ($Url | Select-String -Pattern "[^/\\&\?]+\.\w{3,4}(?=([\?&].*$|$))").Matches.Value #| Select-Object -ExpandProperty Matches | Select-Object -ExpandProperty Value
                     }
                     $OutputPath = Join-Path -Path $TempDir -ChildPath $Filename
                     Invoke-RestMethod -Method Get -Uri $Url -OutFile $OutputPath

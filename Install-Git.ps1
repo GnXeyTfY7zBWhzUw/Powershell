@@ -7,14 +7,19 @@ function Install-Git {
     .EXAMPLE
         Lorem ipsum
     #>
+    #Requires -RunAsAdministrator
     [CmdletBinding()]
     param(
-        [parameter(Mandatory = $false)]
-        [string]
-        $Repo
+        [Parameter(Mandatory = $false)]
+        [Switch]
+        $MeasureTime
     )
     begin {
         $ErrorActionPreference = 'Stop'
+        if ($MeasureTime) {
+            $FuncStartTime = Get-Date
+            Write-Verbose -Message "Function start time: $(Get-Date -Date $FuncStartTime -Format FileDateTimeUniversal)"
+        }
     }
     process {
         try {
@@ -22,7 +27,7 @@ function Install-Git {
             $TempGuid = [System.Guid]::NewGuid().ToString()
             $TempDir = Join-Path -Path $TempPath -ChildPath $TempGuid
             if (!(Test-Path -Path $TempDir)) {
-                $TempDir = New-Item -Type Directory -Path $TempPath -Name $TempGuid
+                $TempDir = New-Item -Path $TempPath -Name $TempGuid -ItemType Directory
                 $TempDir = $TempDir | Select-Object -ExpandProperty FullName
             }
 
@@ -36,7 +41,7 @@ function Install-Git {
             }
             if ($InstallGit) {
                 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-                $Releases = "https://api.github.com/repos/$repo/git/releases"
+                $Releases = "https://api.github.com/repos/git-for-windows/git/releases"
                 $Response = Invoke-WebRequest -Uri $Releases -UseBasicParsing | ConvertFrom-Json
                 $DownloadUrl = $Response.assets | Where-Object { $_.Name -match "-64-bit.exe" -and $_.Name -notmatch "rc" } | Sort-Object -Property created_at -Descending | Select-Object -First 1
 
@@ -55,15 +60,14 @@ function Install-Git {
                 Write-Verbose -Message "Trying to install git."
 
                 try {
-                    $arguments = "/VERYSILENT", "/NORESTART", "/NOCANCEL", "/SP-", "/CLOSEAPPLICATIONS", "/RESTARTAPPLICATIONS"
-                    Start-Process $OutputPath $arguments -Wait
+                    $Arguments = "/VERYSILENT", "/NORESTART", "/NOCANCEL", "/SP-", "/CLOSEAPPLICATIONS", "/RESTARTAPPLICATIONS"
+                    Start-Process $OutputPath $Arguments -Wait
                 }
                 catch {
                     Write-Verbose -Message "Failed to install Git on your laptop, download and install GIT Manually."
                     Write-Verbose -Message "Download Location: https://gitforwindows.org/"
                     Write-Error -Message $_.Exception.Message
                 }
-
             }
             else {
                 Write-Verbose -Message "Git is already installed, no action needed."
@@ -74,10 +78,19 @@ function Install-Git {
         }
         finally {
             Remove-Item -Path $TempDir -Recurse -Force
+            if ($MeasureTime) {
+                $ItemEndTime = Get-Date
+                Write-Verbose -Message "Item run time: $((New-TimeSpan -Start $FuncStartTime -End $ItemEndTime).TotalSeconds) seconds"
+            }
+            $Error.Clear()
         }
     }
     end {
-
+        if ($MeasureTime) {
+            $FuncEndTime = Get-Date
+            Write-Verbose -Message "Function run time: $((New-TimeSpan -Start $FuncStartTime -End $FuncEndTime).TotalSeconds) seconds"
+            Write-Verbose -Message "Function end time: $(Get-Date -Date $FuncEndTime -Format FileDateTimeUniversal)"
+        }
     }
 }
 

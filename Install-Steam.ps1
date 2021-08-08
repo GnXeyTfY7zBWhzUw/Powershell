@@ -7,8 +7,9 @@ function Install-Steam {
     .EXAMPLE
         Lorem ipsum
     #>
+    #Requires -RunAsAdministrator
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory = $false)]
         [Switch]
         $MeasureTime
@@ -26,7 +27,7 @@ function Install-Steam {
             $TempGuid = [System.Guid]::NewGuid().ToString()
             $TempDir = Join-Path -Path $TempPath -ChildPath $TempGuid
             if (!(Test-Path -Path $TempDir)) {
-                $TempDir = New-Item -Type Directory -Path $TempPath -Name $TempGuid
+                $TempDir = New-Item -Path $TempPath -Name $TempGuid -ItemType Directory
                 $TempDir = $TempDir | Select-Object -ExpandProperty FullName
             }
 
@@ -45,8 +46,8 @@ function Install-Steam {
             }
 
             try {
-                $arguments = "/S"
-                Start-Process $OutputPath $arguments -Wait
+                $Arguments = "/S"
+                Start-Process $OutputPath $Arguments -Wait
             }
             catch {
                 Write-Verbose -Message "Failed to install Steam on your laptop, download and install Steam manually."
@@ -59,11 +60,11 @@ function Install-Steam {
         }
         finally {
             Remove-Item -Path $TempDir -Recurse -Force
-            $Error.Clear()
             if ($MeasureTime) {
                 $ItemEndTime = Get-Date
                 Write-Verbose -Message "Item run time: $((New-TimeSpan -Start $FuncStartTime -End $ItemEndTime).TotalSeconds) seconds"
             }
+            $Error.Clear()
         }
     }
     end {
@@ -75,4 +76,4 @@ function Install-Steam {
     }
 }
 
-Install-Steam -Verbose
+Install-Steam -MeasureTime -Verbose

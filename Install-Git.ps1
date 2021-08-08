@@ -46,7 +46,7 @@ function Install-Git {
                 $DownloadUrl = $Response.assets | Where-Object { $_.Name -match "-64-bit.exe" -and $_.Name -notmatch "rc" } | Sort-Object -Property created_at -Descending | Select-Object -First 1
 
                 # Download file to temporary folder
-                Write-Verbose -Message "Trying to download $($repo)."
+                Write-Verbose -Message "Trying to download $DownloadUrl."
                 try {
                     $OutputPath = Join-Path -Path $TempDir -ChildPath $($DownloadUrl.Name)
                     Invoke-RestMethod -Method Get -Uri $DownloadUrl.browser_download_url -OutFile $OutputPath
@@ -94,4 +94,4 @@ function Install-Git {
     }
 }
 
-Install-Git -Repo "git-for-windows" -Verbose
+Install-Git -MeasureTime -Verbose

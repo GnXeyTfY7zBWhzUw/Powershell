@@ -46,14 +46,14 @@ function Install-Git {
                 $DownloadUrl = $Response.assets | Where-Object { $_.Name -match "-64-bit.exe" -and $_.Name -notmatch "rc" } | Sort-Object -Property created_at -Descending | Select-Object -First 1
 
                 # Download file to temporary folder
-                Write-Verbose -Message "Trying to download $DownloadUrl."
+                Write-Verbose -Message "Trying to download $($DownloadUrl.browser_download_url)."
                 try {
                     $OutputPath = Join-Path -Path $TempDir -ChildPath $($DownloadUrl.Name)
                     Invoke-RestMethod -Method Get -Uri $DownloadUrl.browser_download_url -OutFile $OutputPath
                 }
                 catch {
-                    Write-Verbose -Message "Failed to download git on your laptop, download and install git manually."
-                    Write-Verbose -Message "Download location: https://gitforwindows.org/"
+                    Write-Verbose -Message "Failed to download git, download and install git manually."
+                    Write-Verbose -Message "Download location: $($DownloadUrl.browser_download_url)"
                     Write-Error -Message $_.Exception.Message
                 }
 

@@ -94,7 +94,7 @@ $InstallList = New-Object -TypeName System.Collections.Generic.List[pscustomobje
 
 $VSCode = [PSCustomObject]@{
     Url          = "https://code.visualstudio.com/sha/download?build=stable&os=win32-x64"
-    ArgumentList = "/S"
+    ArgumentList = "/VERYSILENT", "/NORESTART", "/MERGETASKS=!runcode"
     Filename     = "VSCode.exe"
 }
 $InstallList.Add($VSCode)

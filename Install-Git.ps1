@@ -3,7 +3,7 @@ function Install-Git {
     .SYNOPSIS
         Lorem ipsum
     .DESCRIPTION
-        Lorem ipsum
+        Adapted from https://www.robvit.com/automation/install-git-with-powershell-on-windows/
     .EXAMPLE
         Lorem ipsum
     #>

@@ -100,12 +100,18 @@ function Copy-GameSaves {
     }
 }
 
+$GameSaveList = New-Object -TypeName System.Collections.Generic.List[pscustomobject] # [pscustomobject] [string]
+
 $BatmanArkhamOrigins = [PSCustomObject]@{
     GameName = "Batman Arkham Origins"
     SaveGamePath = "\userdata\*\209000\remote"
 }
+$GameSaveList.Add($BatmanArkhamOrigins)
 
 $Fallout4 = [PSCustomObject]@{
     GameName = "Fallout 4"
     SaveGamePath = "$(Join-Path -Path $HOME -ChildPath "Documents\My Games\Fallout4")"
 }
+$GameSaveList.Add($Fallout4)
+
+$GameSaveList | Copy-GameSaves -BackupPath $(Join-Path -Path $HOME -ChildPath "Game Save Backups")

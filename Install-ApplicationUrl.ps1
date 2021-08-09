@@ -63,12 +63,19 @@ function Install-ApplicationUrl {
                     if (!($FileName)) {
                         $Filename = $DownloadUrl.Name
                     }
+                    if ($($FileName | Select-String -Pattern "\.[^.]+$").Matches.Value -eq ".msi") {
+                        $Msi = $true
+                    }
                     $OutputPath = Join-Path -Path $TempDir -ChildPath $Filename
                     Invoke-RestMethod -Method Get -Uri $DownloadUrl.browser_download_url -OutFile $OutputPath
-                } else {
+                }
+                else {
                     Write-Verbose -Message "Trying to download $Url"
                     if (!($Filename)) {
                         $Filename = ($Url | Select-String -Pattern "[^/\\&\?]+\.\w{3,4}(?=([\?&].*$|$))").Matches.Value #| Select-Object -ExpandProperty Matches | Select-Object -ExpandProperty Value
+                    }
+                    if ($($FileName | Select-String -Pattern "\.[^.]+$").Matches.Value -eq ".msi") {
+                        $Msi = $true
                     }
                     $OutputPath = Join-Path -Path $TempDir -ChildPath $Filename
                     Invoke-RestMethod -Method Get -Uri $Url -OutFile $OutputPath
@@ -81,11 +88,23 @@ function Install-ApplicationUrl {
             }
 
             try {
-                if ($ArgumentList) {
-                    Start-Process -FilePath $OutputPath -ArgumentList $ArgumentList -Wait
+                if ($Msi) {
+                    if ($ArgumentList) {
+                        $ArgumentList += "/i $OutputPath"
+                        Start-Process -FilePath "$env:systemroot\system32\msiexec.exe" -ArgumentList $ArgumentList -Wait
+                    }
+                    else {
+                        $ArgumentList = "/i $OutputPath"
+                        Start-Process -FilePath "$env:systemroot\system32\msiexec.exe" -ArgumentList $ArgumentList -Wait
+                    }
                 }
                 else {
-                    Start-Process -FilePath $OutputPath -Wait
+                    if ($ArgumentList) {
+                        Start-Process -FilePath $OutputPath -ArgumentList $ArgumentList -Wait
+                    }
+                    else {
+                        Start-Process -FilePath $OutputPath -Wait
+                    }
                 }
             }
             catch {
@@ -132,9 +151,15 @@ $Steam = [PSCustomObject]@{
 }
 $InstallList.Add($Steam)
 
+# $Nvidia = [PSCustomObject]@{
+#     Url          = "https://download.microsoft.com/download/0/0/1/001f0edf-d852-4297-9cb7-10b31b1abf45/462.31_grid_win10_server2016_server2019_64bit_azure_swl.exe"
+#     ArgumentList = "/S"
+# }
+# $InstallList.Add($Nvidia)
+
 $KeePassXC = [PSCustomObject]@{
     Github       = "keepassxreboot/keepassxc"
-    ArgumentList = "/QN"
+    ArgumentList = "/qn"
 }
 $InstallList.Add($KeePassXC)
 

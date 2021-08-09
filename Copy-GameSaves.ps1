@@ -72,8 +72,11 @@ function Copy-GameSaves {
             if ($SteamProc) {
                 Start-Process -FilePath $SteamExe -ArgumentList "-shutdown" -Wait
             }
+
             $SaveGamePath = Join-Path -Path $SteamDir -ChildPath $SaveGamePath | Resolve-Path | Select-Object -ExpandProperty Path
-            $BackupPath = Join-Path -Path $BackupPath -ChildPath $GameName -AdditionalChildPath $(Get-Date -Format FileDateTimeUniversal)
+            $BackupPath = Join-Path -Path $BackupPath -ChildPath $GameName
+            $BackupPath = Join-Path -Path $BackupPath -ChildPath $(Get-Date -Format FileDateTimeUniversal)
+
 
             Copy-Item -Path $SaveGamePath -Destination $BackupPath -Recurse
 

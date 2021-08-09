@@ -25,13 +25,17 @@ function Initialize-Github {
 
         [Parameter(Mandatory = $false)]
         [Switch]
+        $Mirror,
+
+        [Parameter(Mandatory = $false)]
+        [Switch]
         $MeasureTime
     )
     begin {
         $ErrorActionPreference = 'Stop'
         if ($MeasureTime) {
             $FuncStartTime = Get-Date
-            Write-Verbose -Message "Function start time: $(Get-Date -Date $FuncStartTime -Format FileDateTimeUniversal)"
+            Write-Host "Function start time: $(Get-Date -Date $FuncStartTime -Format FileDateTimeUniversal)"
         }
         try {
             git > $null
@@ -48,13 +52,21 @@ function Initialize-Github {
                     $GitAuthor = $GitAuthor.Matches.Groups.Value[4]
                     $GithubDir = Join-Path -Path $GithubDir -ChildPath $GitAuthor
                 }
-                if (!(Test-Path -Path $GithubDir)) {
-                    $GithubDir = New-Item -Path $GithubDir -ItemType Directory
-                    $GithubDir = $GithubDir | Select-Object -ExpandProperty FullName
+                if (Test-Path -Path $GithubDir -and $Mirror) {
+                    Set-Location -Path $GithubDir
+                    git init
+                    git remote add origin $Git
+                    git fetch
+                    git checkout origin/master -ft
+                    return
                 }
-
-                Set-Location -Path $GithubDir
-                git clone $Git
+                else {
+                    $GithubDir = New-Item -Path $GithubDir -ItemType Directory -Force
+                    $GithubDir = $GithubDir | Select-Object -ExpandProperty FullName
+                    Set-Location -Path $GithubDir
+                    git clone $Git
+                    return
+                }
             }
             catch {
                 Write-Error -Message $_.Exception.Message
@@ -67,15 +79,15 @@ function Initialize-Github {
             $Error.Clear()
             if ($MeasureTime) {
                 $ItemEndTime = Get-Date
-                Write-Verbose -Message "Item run time: $((New-TimeSpan -Start $FuncStartTime -End $ItemEndTime).TotalSeconds) seconds"
+                Write-Host "Item run time: $((New-TimeSpan -Start $FuncStartTime -End $ItemEndTime).TotalSeconds) seconds"
             }
         }
     }
     end {
         if ($MeasureTime) {
             $FuncEndTime = Get-Date
-            Write-Verbose -Message "Function run time: $((New-TimeSpan -Start $FuncStartTime -End $FuncEndTime).TotalSeconds) seconds"
-            Write-Verbose -Message "Function end time: $(Get-Date -Date $FuncEndTime -Format FileDateTimeUniversal)"
+            Write-Host "Function run time: $((New-TimeSpan -Start $FuncStartTime -End $FuncEndTime).TotalSeconds) seconds"
+            Write-Host "Function end time: $(Get-Date -Date $FuncEndTime -Format FileDateTimeUniversal)"
         }
     }
 }

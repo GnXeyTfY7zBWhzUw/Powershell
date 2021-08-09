@@ -29,7 +29,6 @@ function Copy-GameSaves {
         $MeasureTime
     )
     begin {
-        $ErrorActionPreference = 'Stop'
         if ($MeasureTime) {
             $FuncStartTime = Get-Date
             Write-Host "Function start time: $(Get-Date -Date $FuncStartTime -Format FileDateTimeUniversal)"
@@ -65,24 +64,20 @@ function Copy-GameSaves {
             Write-Verbose -Message "Cannot locate Steam.exe"
             Write-Error -Message $_.Exception.Message -ErrorAction Stop
         }
+
+        $SteamProc = Get-Process -Name Steam -ErrorAction SilentlyContinue
+        if ($SteamProc) {
+            Start-Process -FilePath $SteamExe -ArgumentList "-shutdown" -Wait
+        }
     }
     process {
         try {
-            $SteamProc = Get-Process -Name Steam -ErrorAction SilentlyContinue
-            if ($SteamProc) {
-                Start-Process -FilePath $SteamExe -ArgumentList "-shutdown" -Wait
-            }
-
             $SaveGamePath = Join-Path -Path $SteamDir -ChildPath $SaveGamePath | Resolve-Path | Select-Object -ExpandProperty Path
+            # PS 5.1 doesn't allow -AdditionalChildPath so we have to combine
             $BackupPath = Join-Path -Path $BackupPath -ChildPath $GameName
             $BackupPath = Join-Path -Path $BackupPath -ChildPath $(Get-Date -Format FileDateTimeUniversal)
 
-
             Copy-Item -Path $SaveGamePath -Destination $BackupPath -Recurse
-
-            if ($SteamProc) {
-                Start-Process -FilePath $SteamExe -Wait
-            }
         }
         catch {
             Write-Error -Message $_.Exception.Message
@@ -95,6 +90,9 @@ function Copy-GameSaves {
         }
     }
     end {
+        if ($SteamProc) {
+            Start-Process -FilePath $SteamExe -Wait
+        }
         if ($MeasureTime) {
             $FuncEndTime = Get-Date
             Write-Host "Function run time: $((New-TimeSpan -Start $FuncStartTime -End $FuncEndTime).TotalSeconds) seconds"

@@ -96,7 +96,7 @@ function Copy-GameSaves {
     }
     end {
         if ($SteamProc) {
-            Start-Process -FilePath $SteamExe -Wait
+            Start-Process -FilePath $SteamExe
         }
         if ($MeasureTime) {
             $FuncEndTime = Get-Date

@@ -39,11 +39,11 @@ function Copy-GameSaves {
         }
 
         try {
-            $SteamDir = Get-ItemProperty -Path HKLM:\SOFTWARE\Valve\Steam -Name InstallPath
+            $SteamDir = Get-ItemProperty -Path HKLM:\SOFTWARE\Valve\Steam -Name InstallPath -ErrorAction Stop
         }
         catch [System.Management.Automation.ItemNotFoundException] {
             try {
-                $SteamDir = Get-ItemProperty -Path HKLM:\SOFTWARE\Wow6432Node\Valve\Steam -Name InstallPath
+                $SteamDir = Get-ItemProperty -Path HKLM:\SOFTWARE\Wow6432Node\Valve\Steam -Name InstallPath -ErrorAction Stop
             }
             catch {
                 $CatchErr = $PSItem
@@ -71,6 +71,7 @@ function Copy-GameSaves {
         $SteamProc = Get-Process -Name Steam -ErrorAction SilentlyContinue
         if ($SteamProc) {
             Start-Process -FilePath $SteamExe -ArgumentList "-shutdown" -Wait
+            Start-Sleep -Seconds 3
         }
     }
     process {
@@ -113,10 +114,10 @@ $BatmanArkhamOrigins = [PSCustomObject]@{
 }
 $GameSaveList.Add($BatmanArkhamOrigins)
 
-$Fallout4 = [PSCustomObject]@{
-    GameName = "Fallout 4"
-    SaveGamePath = "$(Join-Path -Path $HOME -ChildPath "Documents\My Games\Fallout4")"
-}
-$GameSaveList.Add($Fallout4)
+# $Fallout4 = [PSCustomObject]@{
+#     GameName = "Fallout 4"
+#     SaveGamePath = "$(Join-Path -Path $HOME -ChildPath "Documents\My Games\Fallout4")"
+# }
+# $GameSaveList.Add($Fallout4)
 
 $GameSaveList | Copy-GameSaves -BackupPath $(Join-Path -Path $HOME -ChildPath "Game Save Backups")

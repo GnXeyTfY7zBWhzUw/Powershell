@@ -46,13 +46,15 @@ function Copy-GameSaves {
                 $SteamDir = Get-ItemProperty -Path HKLM:\SOFTWARE\Wow6432Node\Valve\Steam -Name InstallPath
             }
             catch {
-                Write-Verbose -Message "Cannot find Steam installation directory."
-                Write-Error -Message $_.Exception.Message -ErrorAction Stop
+                $CatchErr = $PSItem
+                Write-Error -Message "Cannot find Steam installation directory."
+                throw $CatchErr
             }
         }
         catch {
-            Write-Verbose -Message "Cannot find Steam installation directory."
-            Write-Error -Message $_.Exception.Message -ErrorAction Stop
+            $CatchErr = $PSItem
+            Write-Error -Message "Cannot find Steam installation directory."
+            throw $CatchErr
         }
 
         $SteamDir = $SteamDir | Select-Object -ExpandProperty InstallPath
@@ -61,8 +63,9 @@ function Copy-GameSaves {
             $SteamExe = Join-Path -Path $SteamDir -ChildPath "steam.exe" | Resolve-Path | Select-Object -ExpandProperty Path
         }
         catch {
-            Write-Verbose -Message "Cannot locate Steam.exe"
-            Write-Error -Message $_.Exception.Message -ErrorAction Stop
+            $CatchErr
+            Write-Error -Message "Cannot locate Steam.exe"
+            throw $CatchErr
         }
 
         $SteamProc = Get-Process -Name Steam -ErrorAction SilentlyContinue
@@ -80,7 +83,8 @@ function Copy-GameSaves {
             Copy-Item -Path $SaveGamePath -Destination $BackupPath -Recurse
         }
         catch {
-            Write-Error -Message $_.Exception.Message
+            $CatchErr = $PSItem
+            throw $CatchErr
         }
         finally {
             if ($MeasureTime) {

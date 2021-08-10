@@ -52,7 +52,7 @@ function Initialize-Github {
                     $GitAuthor = $GitAuthor.Matches.Groups.Value[4]
                     $GithubDir = Join-Path -Path $GithubDir -ChildPath $GitAuthor
                 }
-                if (Test-Path -Path $GithubDir -and $Mirror) {
+                if ($(Test-Path -Path $GithubDir) -and $Mirror) {
                     Set-Location -Path $GithubDir
                     git init
                     git remote add origin $Git

@@ -71,7 +71,7 @@ function Copy-GameSaves {
         $SteamProc = Get-Process -Name Steam -ErrorAction SilentlyContinue
         if ($SteamProc) {
             Start-Process -FilePath $SteamExe -ArgumentList "-shutdown" -Wait
-            Start-Sleep -Seconds 3
+            Start-Sleep -Seconds 1
         }
     }
     process {
@@ -95,7 +95,7 @@ function Copy-GameSaves {
         }
     }
     end {
-        if ($SteamProc.HasExited) {
+        if ($SteamProc) {
             Start-Process -FilePath $SteamExe
         }
         if ($MeasureTime) {

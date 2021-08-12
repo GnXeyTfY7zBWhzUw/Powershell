@@ -95,7 +95,7 @@ function Copy-GameSaves {
         }
     }
     end {
-        if ($SteamProc) {
+        if ($SteamProc.HasExited) {
             Start-Process -FilePath $SteamExe
         }
         if ($MeasureTime) {
